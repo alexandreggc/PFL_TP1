@@ -105,8 +105,9 @@ print_sorted (Poli ((d,e,f):xs)) = do
          print_sorted (Poli xs) 
 
       
-   
-
+add_poly :: Polynomial Float Char Int -> Polynomial Float Char Int -> Polynomial Float Char Int
+add_poly (Poli []) (Poli ((a,b,c):xs) ) = poli_sort (Poli ((a,b,c):xs) )
+add_poly (Poli ((d,e,f):df)) (Poli ((a,b,c):xs) ) = add_poly (Poli df) (concat_poli (d,e,f) (Poli ((a,b,c):xs)))
 
 normalizar_poli :: Polynomial Float Char Int  -> IO()
 normalizar_poli (Poli ((d,e,f):xs)) = print_sorted $ poli_sort (Poli ((d,e,f):xs))
