@@ -9,10 +9,10 @@ data Polynomial a b c= Poli [(a,[b],[c])] deriving Show
 -- b = letras  
 -- c = expoente(s), caso cada letra tenha um expoente diferente
 poli :: Polynomial Float Char Int
-poli = Poli [(2, "xyz", [2,3,3]), (3,"yzx",[3,3,3]),(1 ,['x'],[5]),(5 ,['x'],[5])]
+poli = Poli [(0, ['x'], [2]), (2,['y'],[1]),(5 ,['z'],[1]),(1 ,['y'],[1]),(7, ['y'], [2])]
 
 polivazio :: Polynomial Float Char Int
-polivazio = Poli []
+polivazio = Poli [(5 ,['z'],[1]),(2,['y'],[1]),(1 ,['y'],[1]),(7, ['y'], [2])]
 
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
@@ -55,6 +55,11 @@ compare_monomio_expoente_menor ((w,x):wx) ((y,z):yz)
 compare_grau :: (Integer a,Integer b) => [a] -> [b] -> Bool
 compare_grau a b = if((sum a) >= (sum b)) then True else False -}
 
+concat_poli :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Float Char Int
+concat_poli (a,b,c) (Poli []) = (Poli [(a,b,c)])
+concat_poli (a,b,c) (Poli ((d,e,f):xs)) =  (Poli ((a,b,c):(d,e,f):xs))
+
+
 -- VER SE AO INSERIR QUANDO AS VARIAVEIS SÂO IGUAIS QUAL CENAS GUARDAR Primeiro if
 poli_insert :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Float Char Int
 poli_insert (a,b,c) (Poli []) = (Poli [(a,b,c)])
@@ -64,12 +69,48 @@ poli_insert (a,b,c) (Poli ((d,e,f):xs))
       | compare_monomio_expoente_menor  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((d,e,f):(a,b,c):xs))
       | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
       | b < e = (Poli ((a,b,c):(d,e,f):xs))
-      | otherwise = (Poli ((d,e,f):(a,b,c):xs))
+      | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
+--      | otherwise = (Poli ((d,e,f):(a,b,c):xs))
 
-  
+--      | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
+
+--- | otherwise = (Poli ((d,e,f):(a,b,c):xs))
 
 poli_sort :: Polynomial Float Char Int -> Polynomial Float Char Int
 poli_sort (Poli ((a,b,c):xs) ) = foldr poli_insert (Poli []) (((a,b,c):xs))
+
+print_mon :: [(Char,Int)] -> IO ()
+print_mon [] = return ()
+print_mon ((x,y):xy) = do
+   if(y==1) then 
+      putStr   [x]
+   else do
+      putStr $  [x] ++ "^" ++ (show y) 
+
+
+print_sorted :: Polynomial Float Char Int -> IO ()
+print_sorted (Poli []) = return ()
+print_sorted (Poli ((d,e,f):xs)) = do
+   let monomio = zip e f
+   if ( d==0) then
+      print_sorted (Poli xs)
+   else do
+      if(d>0) then do
+         putStr $ "+"++ (show d)
+         print_mon monomio
+         print_sorted (Poli xs)  
+      else do
+         putStr $ (show d)
+         print_mon monomio
+         print_sorted (Poli xs) 
+
+      
+   
+
+
+normalizar_poli :: Polynomial Float Char Int  -> IO()
+normalizar_poli (Poli ((d,e,f):xs)) = print_sorted $ poli_sort (Poli ((d,e,f):xs))
+
 
 menu :: IO ()
 menu = do
