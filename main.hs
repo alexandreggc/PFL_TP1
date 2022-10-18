@@ -9,10 +9,10 @@ data Polynomial a b c= Poli [(a,[b],[c])] deriving Show
 -- b = letras  
 -- c = expoente(s), caso cada letra tenha um expoente diferente
 poli :: Polynomial Float Char Int
-poli = Poli [(0, ['x'], [2]), (2,['y'],[1]),(5 ,['z'],[1]),(1 ,['y'],[1]),(7, ['y'], [2])]
+poli = Poli [(0, ['x'], [2]), (2,['y'],[1]),(5 ,['z'],[1]),(1 ,['y'],[1]),(-7, ['y'], [2])]
 
 polivazio :: Polynomial Float Char Int
-polivazio = Poli [(5 ,['z'],[1]),(2,['y'],[1]),(1 ,['y'],[1]),(7, ['y'], [2])]
+polivazio = Poli [(5 ,['z'],[1]),(2,['y'],[1]),(1 ,['y'],[1]),(-7, ['y'], [2])]
 
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
@@ -66,11 +66,11 @@ poli_insert (a,b,c) (Poli []) = (Poli [(a,b,c)])
 poli_insert (a,b,c) (Poli ((d,e,f):xs))   
       | compare_monomio_todo (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((d+a,e,f):xs))
       | compare_monomio_expoente_maior  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((a,b,c):(d,e,f):xs))
-      | compare_monomio_expoente_menor  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((d,e,f):(a,b,c):xs))
+      | compare_monomio_expoente_menor  (order_variables (zip b c)) (order_variables (zip e f)) == True = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
       | b < e = (Poli ((a,b,c):(d,e,f):xs))
       | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
---      | otherwise = (Poli ((d,e,f):(a,b,c):xs))
+--     | otherwise = (Poli ((d,e,f):(a,b,c):xs))
 
 --      | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
 
