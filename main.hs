@@ -12,7 +12,7 @@ poli :: Polynomial Float Char Int
 poli = Poli [(0, ['x'], [2]), (2,['y'],[1]),(5 ,['z'],[1]),(1 ,['y'],[1]),(-7, ['y'], [2])]
 
 polivazio :: Polynomial Float Char Int
-polivazio = Poli [(5 ,['z'],[1]),(2,['y'],[1]),(1 ,['y'],[1]),(-7, ['y'], [2])]
+polivazio = Poli [(1 ,"xy",[0,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]
 
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
@@ -68,13 +68,10 @@ poli_insert (a,b,c) (Poli ((d,e,f):xs))
       | compare_monomio_expoente_maior  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((a,b,c):(d,e,f):xs))
       | compare_monomio_expoente_menor  (order_variables (zip b c)) (order_variables (zip e f)) == True = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
+      | minimum c <= 0 = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | b < e = (Poli ((a,b,c):(d,e,f):xs))
       | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
---     | otherwise = (Poli ((d,e,f):(a,b,c):xs))
 
---      | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
-
---- | otherwise = (Poli ((d,e,f):(a,b,c):xs))
 
 poli_sort :: Polynomial Float Char Int -> Polynomial Float Char Int
 poli_sort (Poli ((a,b,c):xs) ) = foldr poli_insert (Poli []) (((a,b,c):xs))
@@ -84,10 +81,11 @@ print_mon [] = return ()
 print_mon ((x,y):xy) = do
    if(y==1) then 
       putStr   [x]
-   else do
+   else if( y == 0) then return()
+   else do 
       putStr $  [x] ++ "^" ++ (show y) 
 
-
+---  
 print_sorted :: Polynomial Float Char Int -> IO ()
 print_sorted (Poli []) = return ()
 print_sorted (Poli ((d,e,f):xs)) = do
@@ -104,11 +102,43 @@ print_sorted (Poli ((d,e,f):xs)) = do
          print_mon monomio
          print_sorted (Poli xs) 
 
-      
+-- Verificar se o elemento fornecido pertence à lista
+find :: Char -> [Char] -> Bool
+find _ [] = False
+find n (x:xs)
+   | x == n = True
+   | otherwise = find n xs
+
+-- Indice do elemento na lista fornecida
+index :: [Char] -> Char -> Int
+index l n = head [i | (x,i) <- zip l [0 ..], x == n]
+
+
+sub_expoente :: Int -> [Int] -> [Int]
+sub_expoente _ [] = []
+sub_expoente n (x:xs)
+   | n == 0 = (x-1):xs
+   | otherwise = x:sub_expoente (n-1) xs
+
+   
+  
+derivada_poli :: Char -> Polynomial Float Char Int -> Polynomial Float Char Int
+derivada_poli _ (Poli []) = (Poli [])
+derivada_poli a (Poli ((d,e,f):xs)) = if( find a e) then (concat_poli (d*(fromIntegral expo),e,new_expo) (derivada_poli a (Poli xs))) else (concat_poli (d,e,f) (derivada_poli a (Poli xs)))
+   where index_exp = index e a
+         expo = f !! index_exp  
+         new_expo = sub_expoente index_exp f 
+
+ 
+
+
+-- Soma dois polinómios
 add_poly :: Polynomial Float Char Int -> Polynomial Float Char Int -> Polynomial Float Char Int
 add_poly (Poli []) (Poli ((a,b,c):xs) ) = poli_sort (Poli ((a,b,c):xs) )
 add_poly (Poli ((d,e,f):df)) (Poli ((a,b,c):xs) ) = add_poly (Poli df) (concat_poli (d,e,f) (Poli ((a,b,c):xs)))
 
+
+-- Mostra o polinómio normalizado
 normalizar_poli :: Polynomial Float Char Int  -> IO()
 normalizar_poli (Poli ((d,e,f):xs)) = print_sorted $ poli_sort (Poli ((d,e,f):xs))
 
