@@ -8,13 +8,12 @@ data Polynomial a b c= Poli [(a,[b],[c])] deriving Show
 -- a = numero da esquerda
 -- b = letras  
 -- c = expoente(s), caso cada letra tenha um expoente diferente
-compare_monomio :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio [] _ = True
-compare_monomio _ [] = True
-compare_monomio ((w,x):wx) ((y,z):yz)
-   | w /= y = False
-   | x/= z = False
-   | otherwise = True && compare_monomio wx yz
+poli :: Polynomial Float Char Int
+poli = Poli [(2, "xyz", [2,3,3]), (3,"yzx",[3,3,3]),(1 ,['x'],[5]),(5 ,['x'],[5])]
+
+polivazio :: Polynomial Float Char Int
+polivazio = Poli []
+
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
 insert_tuple (w,x) [] = [(w,x)]
@@ -22,25 +21,52 @@ insert_tuple (w,x) ((y,z):yz)
    | w < y = (w,x):(y,z):yz
    |otherwise = (y,z):(insert_tuple (w,x) yz)
 
-order :: (Ord a, Ord b) => [(a,b)]->[(a,b)]
-order l = foldr insert_tuple [] l 
+
+-- usar depois de dar zip das variaveis com os seus expoentes
+order_variables :: (Ord a, Ord b) => [(a,b)]->[(a,b)]
+order_variables l = foldr insert_tuple [] l 
 
 
-poli :: Polynomial Float Char Int
-poli = Poli [(2, ['x'], [2]), (3,['d'],[5])]
+compare_monomio_todo :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
+compare_monomio_todo [] _ = True
+compare_monomio_todo _ [] = True
+compare_monomio_todo ((w,x):wx) ((y,z):yz)
+   | w /= y = False
+   | x/= z = False
+   | otherwise = True && compare_monomio_todo wx yz
 
-polivazio :: Polynomial Float Char Int
-polivazio = Poli []
+compare_monomio_expoente_maior :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
+compare_monomio_expoente_maior [] _ = True
+compare_monomio_expoente_maior _ [] = True
+compare_monomio_expoente_maior ((w,x):wx) ((y,z):yz)
+   | w /= y = False
+   | x <  z = False
+   | otherwise = True && compare_monomio_expoente_maior wx yz
 
+compare_monomio_expoente_menor :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
+compare_monomio_expoente_menor [] _ = True
+compare_monomio_expoente_menor _ [] = True
+compare_monomio_expoente_menor ((w,x):wx) ((y,z):yz)
+   | w /= y = False
+   | x >  z = False
+   | otherwise = True && compare_monomio_expoente_menor wx yz   
+
+{- -- Ns se uso ou não
+compare_grau :: (Integer a,Integer b) => [a] -> [b] -> Bool
+compare_grau a b = if((sum a) >= (sum b)) then True else False -}
+
+-- VER SE AO INSERIR QUANDO AS VARIAVEIS SÂO IGUAIS QUAL CENAS GUARDAR Primeiro if
 poli_insert :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Float Char Int
-poli_insert (a,b,c) (Poli []) = (Poli [])
-poli_insert (a,b,c) (Poli ((d,e,f):xs))
-      | c > f = Poli ((a,b,c):(d,e,f):xs)
-      | head b == 'd' = (Poli ((a,b,c):xs))
-      | (head c) == 1 = (Poli ((a,b,c):xs))
-      | otherwise = (Poli ((a,b,c):xs))
+poli_insert (a,b,c) (Poli []) = (Poli [(a,b,c)])
+poli_insert (a,b,c) (Poli ((d,e,f):xs))   
+      | compare_monomio_todo (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((d+a,e,f):xs))
+      | compare_monomio_expoente_maior  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((a,b,c):(d,e,f):xs))
+      | compare_monomio_expoente_menor  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((d,e,f):(a,b,c):xs))
+      | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
+      | b < e = (Poli ((a,b,c):(d,e,f):xs))
+      | otherwise = (Poli ((d,e,f):(a,b,c):xs))
 
-
+  
 
 poli_sort :: Polynomial Float Char Int -> Polynomial Float Char Int
 poli_sort (Poli ((a,b,c):xs) ) = foldr poli_insert (Poli []) (((a,b,c):xs))
