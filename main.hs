@@ -8,18 +8,43 @@ data Polynomial a b c= Poli [(a,[b],[c])] deriving Show
 -- a = numero da esquerda
 -- b = letras  
 -- c = expoente(s), caso cada letra tenha um expoente diferente
+compare_monomio :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
+compare_monomio [] _ = True
+compare_monomio _ [] = True
+compare_monomio ((w,x):wx) ((y,z):yz)
+   | w /= y = False
+   | x/= z = False
+   | otherwise = True && compare_monomio wx yz
 
-poli :: Polynomial Int Char Int
+insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
+insert_tuple (w,x) [] = [(w,x)]
+insert_tuple (w,x) ((y,z):yz)
+   | w < y = (w,x):(y,z):yz
+   |otherwise = (y,z):(insert_tuple (w,x) yz)
+
+order :: (Ord a, Ord b) => [(a,b)]->[(a,b)]
+order l = foldr insert_tuple [] l 
+
+
+poli :: Polynomial Float Char Int
 poli = Poli [(2, ['x'], [2]), (3,['d'],[5])]
 
-poli2 :: Polynomial Int Char Int -> Bool
-poli2 (Poli ((a,b,c):xs))
-    | a == 1 = True
-    |  head b == 'd' = True
-    | (head c) == 1 = True
-    | otherwise = poli2 (Poli xs)
+polivazio :: Polynomial Float Char Int
+polivazio = Poli []
 
-    
+poli_insert :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Float Char Int
+poli_insert (a,b,c) (Poli []) = (Poli [])
+poli_insert (a,b,c) (Poli ((d,e,f):xs))
+      | c > f = Poli ((a,b,c):(d,e,f):xs)
+      | head b == 'd' = (Poli ((a,b,c):xs))
+      | (head c) == 1 = (Poli ((a,b,c):xs))
+      | otherwise = (Poli ((a,b,c):xs))
+
+
+
+poli_sort :: Polynomial Float Char Int -> Polynomial Float Char Int
+poli_sort (Poli ((a,b,c):xs) ) = foldr poli_insert (Poli []) (((a,b,c):xs))
+
 menu :: IO ()
 menu = do
       putStrLn . unlines $ map concatNums choices
@@ -62,7 +87,7 @@ removespaces (x:xs)
 norm = do
     linha <-getLine
     let semescacos= removespaces linha
-    putStr semescacos
+    putStr $ removespaces linha
     exitSuccess
 add = putStrLn "foo"
 mult = putStrLn "foo"
@@ -72,43 +97,10 @@ ext = exitSuccess
 -- data Arv a = Vazia | No a (Arv a) (Arv a) deriving Show
 
 -- (0*x^2 + 2*y + 5*z + y + 7*y^2)
-     7*y^2 + 3*y +5*z +12 
+  --   7*y^2 + 3*y +5*z +12 
 -- strings expoentes                
   -- str1<str2 str1:str2       exp1 > exp2 exp1:exp2
 
 
 
 
--- Funcoes de arvore aula4 --
-
-data Arv a = Vazia | No a (Arv a) (Arv a) deriving Show
-
-type Pair a b = (a, b)
-
-
--- 4.1 --
-sumArv :: (Num a) => Arv a -> a
-sumArv Vazia = 0
-sumArv (No x l r) = x + (sumArv l) + (sumArv r)
-
-myArv :: Arv Int
-myArv = (No 3(No 2(No 1 Vazia Vazia) Vazia) (No 4 Vazia Vazia))
-
--- 4.4 --
-mapArv :: (a -> b) -> Arv a -> Arv b 
-mapArv _ Vazia = Vazia
-mapArv f (No x l r) = No (f x) (mapArv f l) (mapArv f r)
-
-f :: (Num a) => a -> a
-f a = a+a
-
-
--- 3.4 --
-insert :: Ord a => a -> [a] -> [a]
-insert x [] = [x]
-insert x (y:ys) =   if x <= y
-                    then x:y:ys
-                    else y : insert x ys
-
-isort :: Ord a => [a] -> [a]
-isort l = foldr insert 0 l
