@@ -31,24 +31,24 @@ order_variables l = foldr insert_tuple [] l
 
 
 compare_monomio_todo :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_todo [] _ = False
-compare_monomio_todo _ [] = False
+compare_monomio_todo [] _ = True
+compare_monomio_todo _ [] = True
 compare_monomio_todo ((w,x):wx) ((y,z):yz)
    | w /= y = False
    | x/= z = False
    | otherwise = True && compare_monomio_todo wx yz
 
 compare_monomio_expoente_maior :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_expoente_maior [] _ = False
-compare_monomio_expoente_maior _ [] = False
+compare_monomio_expoente_maior [] _ = True
+compare_monomio_expoente_maior _ [] = True
 compare_monomio_expoente_maior ((w,x):wx) ((y,z):yz)
    | w /= y = False
    | x <  z = False
    | otherwise = True && compare_monomio_expoente_maior wx yz
 
 compare_monomio_expoente_menor :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_expoente_menor [] _ = False
-compare_monomio_expoente_menor _ [] = False
+compare_monomio_expoente_menor [] _ = True
+compare_monomio_expoente_menor _ [] = True
 compare_monomio_expoente_menor ((w,x):wx) ((y,z):yz)
    | w /= y = False
    | x >  z = False
