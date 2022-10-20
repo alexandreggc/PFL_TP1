@@ -132,6 +132,14 @@ sub_expoente n (x:xs)
    | n == 0 = (x-1):xs
    | otherwise = x:sub_expoente (n-1) xs
 
+
+-- adicionar um valor dado a um expoente da lista fornecida
+add_expoente :: Int -> Int -> [Int] -> [Int]
+add_expoente _ _ [] = []
+add_expoente n inc (x:xs)
+   | n == 0 = (x+inc):xs
+   | otherwise = x:add_expoente (n-1) inc xs
+
    
   
 derivada_poli :: Char -> Polynomial Float Char Int -> Polynomial Float Char Int
@@ -141,7 +149,38 @@ derivada_poli a (Poli ((d,e,f):xs)) = if( find a e) then (concat_poli (d*(fromIn
          expo = f !! index_exp  
          new_expo = sub_expoente index_exp f 
 
+num1 :: Polynomial Float Char Int
+num1 = Poli [(1 ,"x",[1]),(-2,"xy",[3,1])]
+num2 :: Polynomial Float Char Int
+num2 = Poli [(1 ,"y",[2]),(3,"x",[2])]
+mon1 :: (Float, [Char], [Int])
+mon1 = (2 ,"abt",[1, 1, 1])
+mon2 :: (Float, [Char], [Int])
+mon2 = (3,"xyt",[1, 2, 2])
  
+-- multiplica dois polinomios
+mult_poli :: Polynomial Float Char Int -> Polynomial Float Char Int -> Polynomial Float Char Int
+mult_poli (Poli a) (Poli b) = Poli [ mult_mon x y | x <- a, y <- b]
+
+-- multiplica dois monomios
+mult_mon :: (Float, [Char], [Int]) -> (Float, [Char], [Int]) -> (Float, [Char], [Int])
+mult_mon (a, [], []) (d, e, f) = (a*d, e, f)
+mult_mon (a, b, c) (d, [], []) = (a*d, b, c)
+mult_mon (a, var:vars, exp:exps) (d,e,f) = if (a==0 || d==0) then (0, [], [])
+                           else (
+                              if (find var e)
+                                 then mult_mon (a, vars, exps) (d, e, new_f)
+                              else
+                                 mult_mon (a, vars, exps) (d, e++[var], f++[exp])
+                              )
+                           where index_exp = index e var
+                                 inc = getElem index_exp (exp:exps)
+                                 new_f = add_expoente index_exp inc f
+
+
+getElem :: Int -> [Int] -> Int
+getElem _ [] = 0
+getElem idx list = if (l == []) then 0 else head l where l = [el | (el, i)<-(zip list [0..]), i==idx]
 
 
 -- Soma dois polinómios
