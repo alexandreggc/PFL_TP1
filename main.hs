@@ -12,7 +12,10 @@ poli :: Polynomial Float Char Int
 poli = Poli [(0, ['x'], [2]), (2,['y'],[1]),(5 ,['z'],[1]),(1 ,['y'],[1]),(-7, ['y'], [2])]
 
 polivazio :: Polynomial Float Char Int
-polivazio = Poli [(1 ,"xy",[0,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]
+polivazio = Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]
+
+poli2 :: Polynomial Float Char Int
+poli2 = Poli [(1 ,['x'],[1]),(2,['y'],[3])]
 
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
@@ -28,24 +31,24 @@ order_variables l = foldr insert_tuple [] l
 
 
 compare_monomio_todo :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_todo [] _ = True
-compare_monomio_todo _ [] = True
+compare_monomio_todo [] _ = False
+compare_monomio_todo _ [] = False
 compare_monomio_todo ((w,x):wx) ((y,z):yz)
    | w /= y = False
    | x/= z = False
    | otherwise = True && compare_monomio_todo wx yz
 
 compare_monomio_expoente_maior :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_expoente_maior [] _ = True
-compare_monomio_expoente_maior _ [] = True
+compare_monomio_expoente_maior [] _ = False
+compare_monomio_expoente_maior _ [] = False
 compare_monomio_expoente_maior ((w,x):wx) ((y,z):yz)
    | w /= y = False
    | x <  z = False
    | otherwise = True && compare_monomio_expoente_maior wx yz
 
 compare_monomio_expoente_menor :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_expoente_menor [] _ = True
-compare_monomio_expoente_menor _ [] = True
+compare_monomio_expoente_menor [] _ = False
+compare_monomio_expoente_menor _ [] = False
 compare_monomio_expoente_menor ((w,x):wx) ((y,z):yz)
    | w /= y = False
    | x >  z = False
@@ -68,7 +71,9 @@ poli_insert (a,b,c) (Poli ((d,e,f):xs))
       | compare_monomio_expoente_maior  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((a,b,c):(d,e,f):xs))
       | compare_monomio_expoente_menor  (order_variables (zip b c)) (order_variables (zip e f)) == True = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
+      | maximum f > maximum c = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | minimum c <= 0 = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
+      | length b < length e = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | b < e = (Poli ((a,b,c):(d,e,f):xs))
       | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
 
@@ -79,11 +84,18 @@ poli_sort (Poli ((a,b,c):xs) ) = foldr poli_insert (Poli []) (((a,b,c):xs))
 print_mon :: [(Char,Int)] -> IO ()
 print_mon [] = return ()
 print_mon ((x,y):xy) = do
-   if(y==1) then 
-      putStr   [x]
+   if(y==1) then(
+      do
+         putStr  ([x])
+         print_mon xy
+      ) 
    else if( y == 0) then return()
-   else do 
-      putStr $  [x] ++ "^" ++ (show y) 
+   else(do 
+         putStr ( [x] ++ "^" ++ (show y) )
+         print_mon xy
+         ) 
+      
+
 
 ---  
 print_sorted :: Polynomial Float Char Int -> IO ()
