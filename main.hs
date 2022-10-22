@@ -1,4 +1,7 @@
 -- MENU --
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use guards" #-}
+{-# HLINT ignore "Use camelCase" #-}
 import System.Exit
 import Data.List
 import Data.List.Split
@@ -15,8 +18,10 @@ polivazio :: Polynomial Float Char Int
 polivazio = Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]
 
 poli2 :: Polynomial Float Char Int
-poli2 = Poli [(1 ,"xx",[1,1]),(2,['y'],[3])]
+poli2 = Poli [(1 ,"x",[1]),(2,"xy",[1,2])]
 
+poli3 :: Polynomial Float Char Int
+poli3 = Poli [(2,"",[]),(1.0,['x'],[1])]
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
 insert_tuple (w,x) [] = [(w,x)]
@@ -28,31 +33,6 @@ insert_tuple (w,x) ((y,z):yz)
 -- usar depois de dar zip das variaveis com os seus expoentes
 order_variables :: (Ord a, Ord b) => [(a,b)]->[(a,b)]
 order_variables l = foldr insert_tuple [] l 
-
-
-compare_monomio_todo :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_todo [] _ = True
-compare_monomio_todo _ [] = True
-compare_monomio_todo ((w,x):wx) ((y,z):yz)
-   | w /= y = False
-   | x/= z = False
-   | otherwise = True && compare_monomio_todo wx yz
-
-compare_monomio_expoente_maior :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_expoente_maior [] _ = True
-compare_monomio_expoente_maior _ [] = True
-compare_monomio_expoente_maior ((w,x):wx) ((y,z):yz)
-   | w /= y = False
-   | x <  z = False
-   | otherwise = True && compare_monomio_expoente_maior wx yz
-
-compare_monomio_expoente_menor :: (Ord a, Ord b) => [(a,b)] ->[(a,b)]-> Bool
-compare_monomio_expoente_menor [] _ = True
-compare_monomio_expoente_menor _ [] = True
-compare_monomio_expoente_menor ((w,x):wx) ((y,z):yz)
-   | w /= y = False
-   | x >  z = False
-   | otherwise = True && compare_monomio_expoente_menor wx yz   
 
 {- -- Ns se uso ou não
 compare_grau :: (Integer a,Integer b) => [a] -> [b] -> Bool
@@ -66,17 +46,19 @@ concat_poli (a,b,c) (Poli ((d,e,f):xs)) =  (Poli ((a,b,c):(d,e,f):xs))
 -- VER SE AO INSERIR QUANDO AS VARIAVEIS SÂO IGUAIS QUAL CENAS GUARDAR Primeiro if
 poli_insert :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Float Char Int
 poli_insert (a,b,c) (Poli []) = (Poli [(a,b,c)])
-poli_insert (a,b,c) (Poli ((d,e,f):xs))   
-      | compare_monomio_todo (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((d+a,e,f):xs))
-      | compare_monomio_expoente_maior  (order_variables (zip b c)) (order_variables (zip e f)) == True = (Poli ((a,b,c):(d,e,f):xs))
-      | compare_monomio_expoente_menor  (order_variables (zip b c)) (order_variables (zip e f)) == True = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
+poli_insert (a,b,c) (Poli ((d,e,f):xs))
+      | null(b) && null(e) = (Poli ((d+a,e,f):xs))
+      | null (b) && (not (null(e)))=  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
+      | (not (null(b))) && null(e) = (Poli ((d+a,e,f):xs))
+      | (order_variables (zip b c)) == (order_variables (zip e f)) = (Poli ((d+a,e,f):xs))
+      | order_variables (zip b c) >= (order_variables (zip e f)) = (Poli ((a,b,c):(d,e,f):xs))
+      | (order_variables (zip b c)) <= (order_variables (zip e f)) = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
       | maximum f > maximum c = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | minimum c <= 0 = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | length b < length e = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | b < e = (Poli ((a,b,c):(d,e,f):xs))
       | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
-
 
 poli_sort :: Polynomial Float Char Int -> Polynomial Float Char Int
 poli_sort (Poli ((a,b,c):xs) ) = foldr poli_insert (Poli []) (((a,b,c):xs))
@@ -155,9 +137,9 @@ num1 = Poli [(1 ,"x",[1]),(-2,"xy",[3,1])]
 num2 :: Polynomial Float Char Int
 num2 = Poli [(1 ,"y",[2]),(3,"x",[2])]
 mon1 :: (Float, [Char], [Int])
-mon1 = (2 ,"abt",[1, 1, 1])
+mon1 = (2 ,"xy",[1, 1])
 mon2 :: (Float, [Char], [Int])
-mon2 = (3,"xyt",[1, 2, 2])
+mon2 = (3,"xy",[1, 1])
  
 -- multiplica dois polinomios
 mult_poli :: Polynomial Float Char Int -> Polynomial Float Char Int -> Polynomial Float Char Int
@@ -169,8 +151,8 @@ mult_mon (a, [], []) (d, e, f) = (a*d, e, f)
 mult_mon (a, b, c) (d, [], []) = (a*d, b, c)
 mult_mon (a, var:vars, exp:exps) (d,e,f) = if (a==0 || d==0) then (0, [], [])
                            else (
-                              if (find_elem var e)
-                                 then mult_mon (a, vars, exps) (d, e, new_f)
+                              if (find_elem var e) then
+                                 mult_mon (a, vars, exps) (d, e, new_f)
                               else
                                  mult_mon (a, vars, exps) (d, e++[var], f++[exp])
                               )
@@ -194,55 +176,6 @@ add_poly (Poli ((d,e,f):df)) (Poli ((a,b,c):xs) ) = add_poly (Poli df) (concat_p
 normalizar_poli :: Polynomial Float Char Int  -> IO()
 normalizar_poli (Poli ((d,e,f):xs)) = print_sorted $ poli_sort (Poli ((d,e,f):xs))
 
-
-menu :: IO ()
-menu = do
-      putStrLn . unlines $ map concatNums choices
-      choice <- getLine
-      case validate choice of
-         Just n  -> execute . read $ choice
-         Nothing -> putStrLn "Please try again"
-
-      menu
-   where concatNums (i, (s, _)) = show i ++ ".) " ++ s
-
-validate :: String -> Maybe Int
-validate s = isValid (reads s)
-   where isValid []            = Nothing
-         isValid ((n, _):_) 
-               | outOfBounds n = Nothing
-               | otherwise     = Just n
-         outOfBounds n = (n < 1) || (n > length choices)
-
-choices :: [(Int, (String, IO ()))]
-choices = zip [1.. ] [
-   ("Normalizar polinomios", norm),
-   ("Adicionar polinomios", add),
-   ("Multiplicar polinomios", mult),
-   ("Calcular a derivada de um polinomio", derv),
-   ("Quit", ext)
- ]
-
-execute :: Int -> IO ()
-execute n = doExec $ filter (\(i, _) -> i == n) choices
-   where doExec ((_, (_,f)):_) = f
-
-removespaces :: String -> String
-removespaces [] = []
-removespaces (x:xs)
-    | x==' ' = removespaces xs
-    | otherwise = x:removespaces xs
-
-
-norm = do
-    linha <-getLine
-    let semescacos= removespaces linha
-    putStr $ removespaces linha
-    exitSuccess
-add = putStrLn "foo"
-mult = putStrLn "foo"
-derv = putStrLn "foo"
-ext = exitSuccess
 
 separateMonom :: String -> String
 separateMonom [] = []
@@ -308,7 +241,7 @@ getExpoents (x:xs)
 
 -- map trun to tuple [strig]
 getTuplo:: [String]-> Polynomial Float Char Int
-getTuplo l = Poli [(getCoeficient u , getVars u , getExpoents u) | u<-l , u/=[]]
+getTuplo l = Poli [(getCoeficient u , getVars u, getExpoents u) | u<-l , u/=[]]
       
 parse :: String -> String
 parse l = addCoeficient (addMissingExponent l)
@@ -317,8 +250,79 @@ parse l = addCoeficient (addMissingExponent l)
 start= do
       putStrLn "Insira a expressão"
       expression <- getLine
-      putStrLn ("Expressão: " ++  (separateMonom(filter (/=' ') expression)))
+      putStrLn ("Expressão: " ++  ((filter (/=' ') expression)))
       let monomios_separados = map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) 
       let polia= getTuplo monomios_separados
       print_monomio_sperads monomios_separados
       normalizar_poli polia
+
+-- menu
+
+menu :: IO()
+menu = do
+      putStrLn "1) Normalizar polinomio"
+      putStrLn "2) Adicionar polinomios"
+      putStrLn "3) Multiplicar polinomios"
+      putStrLn "4) Derivar polinomio"
+      putStrLn "0) Sair"
+      putStrLn "Insira a opção: "
+      opc <- getChar
+      if (opc == '1') then
+         do 
+            putStrLn "\nInsira a expressão inicial:"
+            expression <- getLine
+            putStrLn ("Expressão: " ++  (filter (/=' ') expression))
+            let polinomio =getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) )
+            putStrLn (show polinomio) 
+            putStr ("Polinomio normalizado: ")
+            normalizar_poli polinomio 
+            menu
+      else if (opc == '2') then
+         do
+            putStrLn "\nInsira o primeiro polinomio:"
+            expression1 <- getLine
+            putStrLn ("Primeiro polinomio: " ++  (filter (/=' ') expression1))
+            putStrLn "\nInsira o segundo polinomio:"
+            expression2 <-getLine
+            putStrLn ("Segundo polinomio: " ++  (filter (/=' ') expression2))
+            let pol1 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression1))) )
+            let pol2 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression2))) )
+            putStrLn (show pol1)
+            putStrLn (show pol2)
+            putStr ("Resultado:")
+            normalizar_poli (add_poly pol1 pol2)
+            menu
+      else if (opc == '3') then
+         do
+            putStrLn "\nInsira o primeiro polinomio:"
+            expression1 <- getLine
+            putStrLn ("Primeiro polinomio: " ++  (filter (/=' ') expression1))
+            putStrLn "\nInsira o segundo polinomio:"
+            expression2 <-getLine
+            putStrLn ("Segundo polinomio: " ++  (filter (/=' ') expression2))
+            let pol1 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression1))) )
+            let pol2 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression2))) )
+            putStr ("Resultado:")
+            normalizar_poli (mult_poli pol1 pol2)
+            menu
+      else if (opc == '4') then
+         do
+            putStrLn "\nInsira a expressão a derivar:"
+            expression <- getLine
+            putStrLn ("Expressão: " ++  (filter (/=' ') expression))
+            putStrLn "\nInsira a variavel:"
+            var <- getChar
+            let polinomio = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) )
+            if (isNumber var) then
+               do
+                  putStrLn ("Variavel invalida")
+                  menu
+            else 
+               do 
+                  putStr ("Polinomio derivado: ")
+                  normalizar_poli (derivada_poli var polinomio) 
+                  menu
+      else if (opc == '0') then
+         exitSuccess
+      else menu
+         
