@@ -1,8 +1,8 @@
 -- MENU --
 import System.Exit
-
-
-
+import Data.List
+import Data.List.Split
+import Data.Char
 data Polynomial a b c= Poli [(a,[b],[c])] deriving Show
 --   deriving (Eq, Show)
 -- a = numero da esquerda
@@ -15,7 +15,7 @@ polivazio :: Polynomial Float Char Int
 polivazio = Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]
 
 poli2 :: Polynomial Float Char Int
-poli2 = Poli [(1 ,['x'],[1]),(2,['y'],[3])]
+poli2 = Poli [(1 ,"xx",[1,1]),(2,['y'],[3])]
 
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
@@ -115,11 +115,11 @@ print_sorted (Poli ((d,e,f):xs)) = do
          print_sorted (Poli xs) 
 
 -- Verificar se o elemento fornecido pertence à lista
-find :: Char -> [Char] -> Bool
-find _ [] = False
-find n (x:xs)
+find_elem :: Char -> [Char] -> Bool
+find_elem _ [] = False
+find_elem n (x:xs)
    | x == n = True
-   | otherwise = find n xs
+   | otherwise = find_elem n xs
 
 -- Indice do elemento na lista fornecida
 index :: [Char] -> Char -> Int
@@ -140,11 +140,12 @@ add_expoente n inc (x:xs)
    | n == 0 = (x+inc):xs
    | otherwise = x:add_expoente (n-1) inc xs
 
-   
-  
+
+--- QUando não existe letra meter tudo a 0 ou não existe
+-- Em vez de mudar apenas retirei do polinomio
 derivada_poli :: Char -> Polynomial Float Char Int -> Polynomial Float Char Int
 derivada_poli _ (Poli []) = (Poli [])
-derivada_poli a (Poli ((d,e,f):xs)) = if( find a e) then (concat_poli (d*(fromIntegral expo),e,new_expo) (derivada_poli a (Poli xs))) else (concat_poli (d,e,f) (derivada_poli a (Poli xs)))
+derivada_poli a (Poli ((d,e,f):xs)) = if( find_elem a e) then (concat_poli (d*(fromIntegral expo),e,new_expo) (derivada_poli a (Poli xs))) else ( (derivada_poli a (Poli xs)))
    where index_exp = index e a
          expo = f !! index_exp  
          new_expo = sub_expoente index_exp f 
@@ -168,7 +169,7 @@ mult_mon (a, [], []) (d, e, f) = (a*d, e, f)
 mult_mon (a, b, c) (d, [], []) = (a*d, b, c)
 mult_mon (a, var:vars, exp:exps) (d,e,f) = if (a==0 || d==0) then (0, [], [])
                            else (
-                              if (find var e)
+                              if (find_elem var e)
                                  then mult_mon (a, vars, exps) (d, e, new_f)
                               else
                                  mult_mon (a, vars, exps) (d, e++[var], f++[exp])
@@ -243,13 +244,82 @@ mult = putStrLn "foo"
 derv = putStrLn "foo"
 ext = exitSuccess
 
--- data Arv a = Vazia | No a (Arv a) (Arv a) deriving Show
+separateMonom :: String -> String
+separateMonom [] = []
+separateMonom [l] =[l]
+separateMonom (x:xs)
+   | x=='+' || x=='-' = ' ':x:separateMonom xs
+   |otherwise = x:separateMonom xs
 
--- (0*x^2 + 2*y + 5*z + y + 7*y^2)
-  --   7*y^2 + 3*y +5*z +12 
--- strings expoentes                
-  -- str1<str2 str1:str2       exp1 > exp2 exp1:exp2
+
+--- Acho que não é usado
+splitOnAnyOf :: Eq a => [[a]] -> [a] -> [[a]]
+splitOnAnyOf ds xs = foldl' (\ys d -> ys >>= splitOn d) [xs] ds
+
+print_monomio_sperads :: [String] ->IO()
+print_monomio_sperads [] = return ()
+print_monomio_sperads (x:xs) = do
+      putStrLn x 
+      print_monomio_sperads xs
 
 
+
+
+-- para usar quando já tiverem separados em monomios
+addCoeficient :: String -> String
+addCoeficient [] = []
+addCoeficient (x:xs)
+   | x=='-' && (isLetter (head(xs))) = "-1"++ xs  
+   | x=='+' && (isLetter (head(xs))) = "+1"++ xs 
+   | isLetter x == True = "1"++(x:xs)
+   |otherwise = x:xs
+
+-- para usar quando já tiverem separados em monomios
+addMissingExponent :: String -> String
+addMissingExponent [] = []
+addMissingExponent (x:xs)
+   | isLetter x && xs==[] = [x]++ "^1"
+   | isLetter x && (head(xs)) /= '^' = [x]++ "^1" ++ addMissingExponent xs
+   | otherwise = x:addMissingExponent xs
+
+-- para usar quando já tiverem separados em monomios
+getCoeficient :: String -> Float
+getCoeficient [] = 0
+getCoeficient l = read (takeWhile (\x -> (isNumber x) || (x=='+') || (x=='-') || (x=='.') ) l) :: Float
+
+-- para usar quando já tiverem separados em monomios
+getVars :: String -> String
+getVars [] = []
+getVars  (x:xs) 
+   |isLetter x = x:getVars xs
+   | otherwise = getVars xs
+
+
+ -- para usar quando já tiverem separados em monomios
+getExpoents :: String -> [Int]
+getExpoents  [] = []
+getExpoents (x:xs)
+   | x=='^' = (read (takeWhile (isNumber) xs) ::Int):getExpoents xs
+   | otherwise = getExpoents xs
+ 
+
+ 
+
+-- map trun to tuple [strig]
+getTuplo:: [String]-> Polynomial Float Char Int
+getTuplo l = Poli [(getCoeficient u , getVars u , getExpoents u) | u<-l , u/=[]]
+      
+parse :: String -> String
+parse l = addCoeficient (addMissingExponent l)
+
+--  string -> [strings] -> addCoeficient na lista toda -> 
+start= do
+      putStrLn "Insira a expressão"
+      expression <- getLine
+      putStrLn ("Expressão: " ++  (separateMonom(filter (/=' ') expression)))
+      let monomios_separados = map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) 
+      let polia= getTuplo monomios_separados
+     -- show polia
+      print_monomio_sperads monomios_separados
 
 
