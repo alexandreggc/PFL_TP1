@@ -99,7 +99,7 @@ print_mon ((x,y):xy) = do
 
 ---  
 print_sorted :: Polynomial Float Char Int -> IO ()
-print_sorted (Poli []) = return ()
+print_sorted (Poli []) = putStrLn ""
 print_sorted (Poli ((d,e,f):xs)) = do
    let monomio = zip e f
    if ( d==0) then
@@ -285,7 +285,8 @@ addMissingExponent (x:xs)
 -- para usar quando já tiverem separados em monomios
 getCoeficient :: String -> Float
 getCoeficient [] = 0
-getCoeficient l = read (takeWhile (\x -> (isNumber x) || (x=='+') || (x=='-') || (x=='.') ) l) :: Float
+getCoeficient l = read ( (if((head number) == '+') then tail number else number)) :: Float
+   where number=takeWhile (\x -> (isNumber x) || (x=='+') || (x=='-') || (x=='.') ) l
 
 -- para usar quando já tiverem separados em monomios
 getVars :: String -> String
@@ -319,7 +320,5 @@ start= do
       putStrLn ("Expressão: " ++  (separateMonom(filter (/=' ') expression)))
       let monomios_separados = map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) 
       let polia= getTuplo monomios_separados
-     -- show polia
       print_monomio_sperads monomios_separados
-
-
+      normalizar_poli polia
