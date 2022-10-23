@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use guards" #-}
 {-# HLINT ignore "Use camelCase" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 import System.Exit
 import Data.List
 import Data.List.Split
@@ -133,11 +134,11 @@ derivada_poli a (Poli ((d,e,f):xs)) = if( find_elem a e) then (concat_poli (d*(f
          new_expo = sub_expoente index_exp f 
 
 num1 :: Polynomial Float Char Int
-num1 = Poli [(1 ,"x",[1]),(-2,"xy",[3,1])]
+num1 = Poli [(1 ,"xt",[1, 1]),(-2,"xy",[3,1])]
 num2 :: Polynomial Float Char Int
-num2 = Poli [(1 ,"y",[2]),(3,"x",[2])]
+num2 = Poli [(1 ,"yt",[2, 1]),(3,"x",[2])]
 mon1 :: (Float, [Char], [Int])
-mon1 = (2 ,"xy",[1, 1])
+mon1 = (2 ,"xyt",[1, 1, 1])
 mon2 :: (Float, [Char], [Int])
 mon2 = (3,"xy",[1, 1])
  
@@ -157,13 +158,7 @@ mult_mon (a, var:vars, exp:exps) (d,e,f) = if (a==0 || d==0) then (0, [], [])
                                  mult_mon (a, vars, exps) (d, e++[var], f++[exp])
                               )
                            where index_exp = index e var
-                                 inc = getElem index_exp (exp:exps)
-                                 new_f = add_expoente index_exp inc f
-
-
-getElem :: Int -> [Int] -> Int
-getElem _ [] = 0
-getElem idx list = if (l == []) then 0 else head l where l = [el | (el, i)<-(zip list [0..]), i==idx]
+                                 new_f = add_expoente index_exp exp f
 
 
 -- Soma dois polinómios
