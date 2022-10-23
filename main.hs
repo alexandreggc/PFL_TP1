@@ -1,4 +1,5 @@
 -- MENU --
+module Polinomio where
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use guards" #-}
 {-# HLINT ignore "Use camelCase" #-}
@@ -7,7 +8,7 @@ import System.Exit
 import Data.List
 import Data.List.Split
 import Data.Char
-data Polynomial a b c= Poli [(a,[b],[c])] deriving Show
+data Polynomial a b c= Poli [(a,[b],[c])] deriving (Eq,Show)
 --   deriving (Eq, Show)
 -- a = numero da esquerda
 -- b = letras  
@@ -22,7 +23,7 @@ poli2 :: Polynomial Float Char Int
 poli2 = Poli [(1 ,"x",[1]),(2,"xy",[1,2])]
 
 poli3 :: Polynomial Float Char Int
-poli3 = Poli [(2,"",[]),(1.0,['x'],[1])]
+poli3 = Poli [(1.0,['x'],[1]),(2,"",[])]
 
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
 insert_tuple (w,x) [] = [(w,x)]
@@ -49,11 +50,12 @@ poli_insert :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Flo
 poli_insert (a,b,c) (Poli []) = (Poli [(a,b,c)])
 poli_insert (a,b,c) (Poli ((d,e,f):xs))
       | null(b) && null(e) = (Poli ((d+a,e,f):xs))
+      | not (null (b)) && (null(e)) = (Poli ((a,b,c):(d,e,f):xs)) 
       | null (b) && (not (null(e)))=  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | (not (null(b))) && null(e) = (Poli ((d+a,e,f):xs))
       | (order_variables (zip b c)) == (order_variables (zip e f)) = (Poli ((d+a,e,f):xs))
-      | order_variables (zip b c) >= (order_variables (zip e f)) = (Poli ((a,b,c):(d,e,f):xs))
-      | (order_variables (zip b c)) <= (order_variables (zip e f)) = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
+ --     | order_variables (zip b c) >= (order_variables (zip e f)) = (Poli ((a,b,c):(d,e,f):xs))
+ --     | (order_variables (zip b c)) <= (order_variables (zip e f)) = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
       | maximum f > maximum c = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | minimum c <= 0 = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
