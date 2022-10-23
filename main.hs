@@ -1,51 +1,61 @@
 -- MENU --
 module Polinomio where
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Use guards" #-}
-{-# HLINT ignore "Use camelCase" #-}
-{-# HLINT ignore "Redundant bracket" #-}
+
 import System.Exit
 import Data.List
 import Data.List.Split
 import Data.Char
 data Polynomial a b c= Poli [(a,[b],[c])] deriving (Eq,Show)
---   deriving (Eq, Show)
--- a = numero da esquerda
--- b = letras  
--- c = expoente(s), caso cada letra tenha um expoente diferente
-poli :: Polynomial Float Char Int
-poli = Poli [(0, ['x'], [2]), (2,['y'],[1]),(5 ,['z'],[1]),(1 ,['y'],[1]),(-7, ['y'], [2])]
+-- (a,[b],[c]) -> Representa um Monomio
+-- a = Coeficientes
+-- b = variaveis  
+-- c = expoentes de cada variavel
 
-polivazio :: Polynomial Float Char Int
-polivazio = Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]
+-- Polinomios para testes
+poli1 :: Polynomial Float Char Int
+poli1 = Poli [(0, ['x'], [2]), (2,['y'],[1]),(5 ,['z'],[1]),(1 ,['y'],[1]),(-7, ['y'], [2])]
 
 poli2 :: Polynomial Float Char Int
-poli2 = Poli [(1 ,"x",[1]),(2,"xy",[1,2])]
+poli2 = Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]
 
 poli3 :: Polynomial Float Char Int
-poli3 = Poli [(1.0,['x'],[1]),(2,"",[])]
+poli3 = Poli [(1 ,"x",[1]),(2,"xy",[1,2])]
 
+poli4 :: Polynomial Float Char Int
+poli4 = Poli [(1.0,['x'],[1]),(2,"",[])]
+
+num1 :: Polynomial Float Char Int
+num1 = Poli [(1 ,"xt",[1, 1]),(-2,"xy",[3,1])]
+
+num2 :: Polynomial Float Char Int
+num2 = Poli [(1 ,"yt",[2, 1]),(3,"x",[2])]
+
+mon1 :: (Float, [Char], [Int])
+mon1 = (2 ,"xyt",[1, 1, 1])
+
+mon2 :: (Float, [Char], [Int])
+mon2 = (3,"xy",[1, 1])
+------------
+
+-- Insere um tuplo de forma alfabeticca
 insert_tuple :: (Ord a , Ord b) => (a,b) -> [(a,b)] -> [(a,b)]
 insert_tuple (w,x) [] = [(w,x)]
 insert_tuple (w,x) ((y,z):yz)
    | w < y = (w,x):(y,z):yz
    |otherwise = (y,z):(insert_tuple (w,x) yz)
 
-
--- usar depois de dar zip das variaveis com os seus expoentes
+-- Ordena a lista de tuplos alfabeticamente
 order_variables :: (Ord a, Ord b) => [(a,b)]->[(a,b)]
 order_variables l = foldr insert_tuple [] l 
 
-{- -- Ns se uso ou não
-compare_grau :: (Integer a,Integer b) => [a] -> [b] -> Bool
-compare_grau a b = if((sum a) >= (sum b)) then True else False -}
 
+-- Concatena um monomio a um polinomio
 concat_poli :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Float Char Int
 concat_poli (a,b,c) (Poli []) = (Poli [(a,b,c)])
 concat_poli (a,b,c) (Poli ((d,e,f):xs)) =  (Poli ((a,b,c):(d,e,f):xs))
 
 
--- VER SE AO INSERIR QUANDO AS VARIAVEIS SÂO IGUAIS QUAL CENAS GUARDAR Primeiro if
+-- Insere um monomio num polinomio de acordo com as regras de normalização
 poli_insert :: (Float,[Char],[Int])->Polynomial Float Char Int -> Polynomial Float Char Int
 poli_insert (a,b,c) (Poli []) = (Poli [(a,b,c)])
 poli_insert (a,b,c) (Poli ((d,e,f):xs))
@@ -54,8 +64,6 @@ poli_insert (a,b,c) (Poli ((d,e,f):xs))
       | null (b) && (not (null(e)))=  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | (not (null(b))) && null(e) = (Poli ((d+a,e,f):xs))
       | (order_variables (zip b c)) == (order_variables (zip e f)) = (Poli ((d+a,e,f):xs))
- --     | order_variables (zip b c) >= (order_variables (zip e f)) = (Poli ((a,b,c):(d,e,f):xs))
- --     | (order_variables (zip b c)) <= (order_variables (zip e f)) = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | maximum c > maximum f = (Poli ((a,b,c):(d,e,f):xs)) 
       | maximum f > maximum c = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
       | minimum c <= 0 = (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
@@ -63,9 +71,12 @@ poli_insert (a,b,c) (Poli ((d,e,f):xs))
       | b < e = (Poli ((a,b,c):(d,e,f):xs))
       | otherwise =  (concat_poli (d,e,f)   (poli_insert (a,b,c) (Poli xs)))
 
+-- Ordena um polinomio de acordo com as regras de normalização de um polinomio
 poli_sort :: Polynomial Float Char Int -> Polynomial Float Char Int
 poli_sort (Poli ((a,b,c):xs) ) = foldr poli_insert (Poli []) (((a,b,c):xs))
 
+
+-- Dá print às variaveis e aos seus expoentes de um monomio
 print_mon :: [(Char,Int)] -> IO ()
 print_mon [] = return ()
 print_mon ((x,y):xy) = do
@@ -80,9 +91,7 @@ print_mon ((x,y):xy) = do
          print_mon xy
          ) 
       
-
-
----  
+---Dá print a um Polinomio
 print_sorted :: Polynomial Float Char Int -> IO ()
 print_sorted (Poli []) = putStrLn ""
 print_sorted (Poli ((d,e,f):xs)) = do
@@ -110,7 +119,7 @@ find_elem n (x:xs)
 index :: [Char] -> Char -> Int
 index l n = head [i | (x,i) <- zip l [0 ..], x == n]
 
-
+-- Subtrai um ao expoente indicado
 sub_expoente :: Int -> [Int] -> [Int]
 sub_expoente _ [] = []
 sub_expoente n (x:xs)
@@ -126,8 +135,7 @@ add_expoente n inc (x:xs)
    | otherwise = x:add_expoente (n-1) inc xs
 
 
---- QUando não existe letra meter tudo a 0 ou não existe
--- Em vez de mudar apenas retirei do polinomio
+-- Deriva a um polinomio, caso o monomio não contenha a letra indicada para derivar ele é retirado do polinomio
 derivada_poli :: Char -> Polynomial Float Char Int -> Polynomial Float Char Int
 derivada_poli _ (Poli []) = (Poli [])
 derivada_poli a (Poli ((d,e,f):xs)) = if( find_elem a e) then (concat_poli (d*(fromIntegral expo),e,new_expo) (derivada_poli a (Poli xs))) else ( (derivada_poli a (Poli xs)))
@@ -135,14 +143,7 @@ derivada_poli a (Poli ((d,e,f):xs)) = if( find_elem a e) then (concat_poli (d*(f
          expo = f !! index_exp  
          new_expo = sub_expoente index_exp f 
 
-num1 :: Polynomial Float Char Int
-num1 = Poli [(1 ,"xt",[1, 1]),(-2,"xy",[3,1])]
-num2 :: Polynomial Float Char Int
-num2 = Poli [(1 ,"yt",[2, 1]),(3,"x",[2])]
-mon1 :: (Float, [Char], [Int])
-mon1 = (2 ,"xyt",[1, 1, 1])
-mon2 :: (Float, [Char], [Int])
-mon2 = (3,"xy",[1, 1])
+
  
 -- multiplica dois polinomios
 mult_poli :: Polynomial Float Char Int -> Polynomial Float Char Int -> Polynomial Float Char Int
@@ -173,7 +174,7 @@ add_poly (Poli ((d,e,f):df)) (Poli ((a,b,c):xs) ) = add_poly (Poli df) (concat_p
 normalizar_poli :: Polynomial Float Char Int  -> IO()
 normalizar_poli (Poli ((d,e,f):xs)) = print_sorted $ poli_sort (Poli ((d,e,f):xs))
 
-
+-- Usado para separar os monomios, coloca um espaço entre eles
 separateMonom :: String -> String
 separateMonom [] = []
 separateMonom [l] =[l]
@@ -182,10 +183,7 @@ separateMonom (x:xs)
    |otherwise = x:separateMonom xs
 
 
---- Acho que não é usado
-splitOnAnyOf :: Eq a => [[a]] -> [a] -> [[a]]
-splitOnAnyOf ds xs = foldl' (\ys d -> ys >>= splitOn d) [xs] ds
-
+-- Dá print dos monomios conseguidos da string lida, usado só para debugging
 print_monomio_sperads :: [String] ->IO()
 print_monomio_sperads [] = return ()
 print_monomio_sperads (x:xs) = do
@@ -193,9 +191,7 @@ print_monomio_sperads (x:xs) = do
       print_monomio_sperads xs
 
 
-
-
--- para usar quando já tiverem separados em monomios
+-- Adiciona um "1" caso seja apenas uma variavel, exemplo "x"->"1x" ou um "-1" no cado de "-x"->"-1x"
 addCoeficient :: String -> String
 addCoeficient [] = []
 addCoeficient (x:xs)
@@ -204,7 +200,7 @@ addCoeficient (x:xs)
    | isLetter x == True = "1"++(x:xs)
    |otherwise = x:xs
 
--- para usar quando já tiverem separados em monomios
+-- Adiciona "^1" às variaveis que não têm expoente
 addMissingExponent :: String -> String
 addMissingExponent [] = []
 addMissingExponent (x:xs)
@@ -212,13 +208,14 @@ addMissingExponent (x:xs)
    | isLetter x && (head(xs)) /= '^' = [x]++ "^1" ++ addMissingExponent xs
    | otherwise = x:addMissingExponent xs
 
--- para usar quando já tiverem separados em monomios
+-- Consegue o coefience de um monomio
 getCoeficient :: String -> Float
 getCoeficient [] = 0
 getCoeficient l = read ( (if((head number) == '+') then tail number else number)) :: Float
    where number=takeWhile (\x -> (isNumber x) || (x=='+') || (x=='-') || (x=='.') ) l
 
--- para usar quando já tiverem separados em monomios
+
+-- Consegue apenas as variaveis de um monomio
 getVars :: String -> String
 getVars [] = []
 getVars  (x:xs) 
@@ -226,7 +223,7 @@ getVars  (x:xs)
    | otherwise = getVars xs
 
 
- -- para usar quando já tiverem separados em monomios
+ --Consegue uma lista com os expoentes de cada variavel do monomio
 getExpoents :: String -> [Int]
 getExpoents  [] = []
 getExpoents (x:xs)
@@ -234,27 +231,16 @@ getExpoents (x:xs)
    | otherwise = getExpoents xs
  
 
- 
-
--- map trun to tuple [strig]
+-- transforma uma lista de monomios num polinomio
 getTuplo:: [String]-> Polynomial Float Char Int
 getTuplo l = Poli [(getCoeficient u , getVars u, getExpoents u) | u<-l , u/=[]]
-      
+
+-- adiciona coefieciente, caso não exista, e expoentes às variaveis do monomio que não tenham   
 parse :: String -> String
 parse l = addCoeficient (addMissingExponent l)
 
---  string -> [strings] -> addCoeficient na lista toda -> 
-start= do
-      putStrLn "Insira a expressão"
-      expression <- getLine
-      putStrLn ("Expressão: " ++  ((filter (/=' ') expression)))
-      let monomios_separados = map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) 
-      let polia= getTuplo monomios_separados
-      print_monomio_sperads monomios_separados
-      normalizar_poli polia
 
 -- menu
-
 menu :: IO()
 menu = do
       putStrLn "1) Normalizar polinomio"
