@@ -213,63 +213,63 @@ testMultiplicar10 =
 --Derivar um Polinomio Vazio Por uma letra qualquer
 testDerivar1 :: Test
 testDerivar1 = 
-     TestCase $ assertEqual "testDerivar1: Deve retornar um polinomio vazio " (Poli []) (derivada_poli 'x' (Poli []))
+     TestCase $ assertEqual "testDerivar1: Deve retornar um polinomio vazio " (Poli [(0,"",[])]) (derivada_poli 'x' (Poli []))
 -------
 
 --Derivar um Monomio com letra existene
 testDerivar2 :: Test
 testDerivar2 = 
-     TestCase $ assertEqual "testDerivar2: Deve retornar o monomio com o coeficiente multiplicado pelo expoente e reduzir o expoente por 1 " (Poli [(1,"x",[0])]) (derivada_poli 'x' (Poli [(1,"x",[1])]))
+     TestCase $ assertEqual "testDerivar2: Deve retornar o monomio com o coeficiente multiplicado pelo expoente e reduzir o expoente por 1 " (Poli [(1,"x",[0]),(0,"",[])]) (derivada_poli 'x' (Poli [(1,"x",[1])]))
 
 testDerivar3 :: Test
 testDerivar3 = 
-     TestCase $ assertEqual "testDerivar3: Deve retornar o monomio com o coeficiente multiplicado pelo expoente e reduzir o expoente por 1 " (Poli [(6,"x",[1])]) (derivada_poli 'x' (Poli [(3,"x",[2])]))
+     TestCase $ assertEqual "testDerivar3: Deve retornar o monomio com o coeficiente multiplicado pelo expoente e reduzir o expoente por 1 " (Poli [(6,"x",[1]),(0,"",[])]) (derivada_poli 'x' (Poli [(3,"x",[2])]))
 ---
 
 --Derivar o polinomio só com numeros
 testDerivar4 :: Test
 testDerivar4 = 
-     TestCase $ assertEqual "testDerivar4: Deve retornar um polinomio vazio " (Poli []) (derivada_poli 'x' (Poli [(2,"",[]),(6,"",[]),(5,"",[]),(4,"",[])]))
+     TestCase $ assertEqual "testDerivar4: Deve retornar um polinomio vazio " (Poli [(0,"",[])]) (derivada_poli 'x' (Poli [(2,"",[]),(6,"",[]),(5,"",[]),(4,"",[])]))
 ---
 
 --Derivar o polinomio com diferentes graus, todos com a mesma variavel que a escolhida ou só um numero
 testDerivar5 :: Test
 testDerivar5 = 
-     TestCase $ assertEqual "testDerivar5: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 " (Poli [(9,"x",[2]),(4,"x",[1]),(5,"x",[0])]) (derivada_poli 'x' (Poli [(3,"x",[3]),(2,"x",[2]),(5,"x",[1])]))
+     TestCase $ assertEqual "testDerivar5: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 " (Poli [(9,"x",[2]),(4,"x",[1]),(5,"x",[0]),(0,"",[])]) (derivada_poli 'x' (Poli [(3,"x",[3]),(2,"x",[2]),(5,"x",[1])]))
 
 testDerivar6 :: Test
 testDerivar6 = 
-     TestCase $ assertEqual "testDerivar6: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 " (Poli [(9,"x",[2]),(4,"x",[1]),(5,"x",[0])]) (derivada_poli 'x' (Poli [(3,"",[]),(3,"x",[3]),(2,"",[]),(2,"x",[2]),(31,"",[]),(5,"x",[1])]))
+     TestCase $ assertEqual "testDerivar6: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 " (Poli [(9,"x",[2]),(4,"x",[1]),(5,"x",[0]),(0,"",[])]) (derivada_poli 'x' (Poli [(3,"",[]),(3,"x",[3]),(2,"",[]),(2,"x",[2]),(31,"",[]),(5,"x",[1])]))
 ---------
 
 --Derivar o polinomio com diferentes graus, monomios podem ter ou não a variavel escolhida e com podem ter mais que uma letra, exemplo "xy"
 testDerivar7 :: Test
 testDerivar7 = 
-    TestCase $ assertEqual "testDerivar7: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter duas variaveis ) " (Poli [(9,"xy",[2,1]),(8,"zx",[3,3])]) (derivada_poli 'x' (Poli [(3,"",[]),(3,"xy",[3,1]),(3,"z",[3]),(2,"zx",[3,4]),(2,"",[]),(9,"y",[2]),(31,"",[]),(5,"y",[1])]))
+    TestCase $ assertEqual "testDerivar7: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter duas variaveis ) " (Poli [(9,"xy",[2,1]),(8,"zx",[3,3]),(0,"",[])]) (derivada_poli 'x' (Poli [(3,"",[]),(3,"xy",[3,1]),(3,"z",[3]),(2,"zx",[3,4]),(2,"",[]),(9,"y",[2]),(31,"",[]),(5,"y",[1])]))
 
 testDerivar8 :: Test
 testDerivar8 = 
-    TestCase $ assertEqual "testDerivar8: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter duas variaveis, desta vez por y ) " (Poli [(3,"xy",[3,0]),(18,"y",[1]),(5,"y",[0])]) (derivada_poli 'y' (Poli [(3,"",[]),(3,"xy",[3,1]),(3,"z",[3]),(2,"zx",[3,4]),(2,"",[]),(9,"y",[2]),(31,"",[]),(5,"y",[1])]))
+    TestCase $ assertEqual "testDerivar8: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter duas variaveis, desta vez por y ) " (Poli [(3,"xy",[3,0]),(18,"y",[1]),(5,"y",[0]),(0,"",[])]) (derivada_poli 'y' (Poli [(3,"",[]),(3,"xy",[3,1]),(3,"z",[3]),(2,"zx",[3,4]),(2,"",[]),(9,"y",[2]),(31,"",[]),(5,"y",[1])]))
 
 testDerivar9 :: Test
 testDerivar9 = 
-    TestCase $ assertEqual "testDerivar9: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter três variaveis) " (Poli [(2,"yzx",[3,1,4])]) (derivada_poli 'z' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
+    TestCase $ assertEqual "testDerivar9: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter três variaveis) " (Poli [(2,"yzx",[3,1,4]),(0,"",[])]) (derivada_poli 'z' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
 
 testDerivar10 :: Test
 testDerivar10 = 
-    TestCase $ assertEqual "testDerivar10: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter três variaveis) " (Poli [(1 ,"xy",[0,2]),(4,"yzx",[3,2,3]),(6,['x'],[2])]) (derivada_poli 'x' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
+    TestCase $ assertEqual "testDerivar10: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter três variaveis) " (Poli [(1 ,"xy",[0,2]),(4,"yzx",[3,2,3]),(6,['x'],[2]),(0,"",[])]) (derivada_poli 'x' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
 
 testDerivar11 :: Test
 testDerivar11 = 
-    TestCase $ assertEqual "testDerivar11: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter três variaveis) " (Poli [(2,"xy",[1,1]),(6,['y'],[2]),(3,"yzx",[2,2,4])]) (derivada_poli 'y' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
+    TestCase $ assertEqual "testDerivar11: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter três variaveis) " (Poli [(2,"xy",[1,1]),(6,['y'],[2]),(3,"yzx",[2,2,4]),(0,"",[])]) (derivada_poli 'y' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
 
 testDerivar12 :: Test
 testDerivar12 = 
-    TestCase $ assertEqual "testDerivar12: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter quatro variaveis) " (Poli [(10 ,"axty",[9,1,9,2]),(20,['t'],[9]),(6,"tui",[2,11,12])]) (derivada_poli 't' (Poli [(2,"zxcads",[10,10,123,4,5,6]),(1 ,"axty",[9,1,10,2]),(2,['t'],[10]),(2,"tui",[3,11,12]),(1 ,"yzx",[3,2,4]),(2,"",[]),(2,['x'],[3])]))
+    TestCase $ assertEqual "testDerivar12: Deve retornar o polinomios com o coeficientes multiplicados pelo expoente da sua variavel e reduzir o expoente por 1 (monomios podem ter quatro variaveis) " (Poli [(10 ,"axty",[9,1,9,2]),(20,['t'],[9]),(6,"tui",[2,11,12]),(0,"",[])]) (derivada_poli 't' (Poli [(2,"zxcads",[10,10,123,4,5,6]),(1 ,"axty",[9,1,10,2]),(2,['t'],[10]),(2,"tui",[3,11,12]),(1 ,"yzx",[3,2,4]),(2,"",[]),(2,['x'],[3])]))
 
 testDerivar13 :: Test
 testDerivar13 = 
-    TestCase $ assertEqual "testDerivar13: Deve retornar o polinomios vazio (monomios podem ter três variaveis) " (Poli []) (derivada_poli 'a' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
+    TestCase $ assertEqual "testDerivar13: Deve retornar o polinomios vazio (monomios podem ter três variaveis) " (Poli [(0,"",[])]) (derivada_poli 'a' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
 
 testes :: IO Counts
 testes = runTestTT $ TestList [ testNormalizar1,testNormalizar2,testNormalizar3,testNormalizar4,testNormalizar5,testNormalizar6,testNormalizar5,testNormalizar6,testNormalizar7,testNormalizar8,testNormalizar9,testNormalizar10,testNormalizar11,testNormalizar12,testNormalizar13,testNormalizar14,testNormalizar15,

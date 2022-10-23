@@ -137,7 +137,7 @@ add_expoente n inc (x:xs)
 
 -- Deriva a um polinomio, caso o monomio não contenha a letra indicada para derivar ele é retirado do polinomio
 derivada_poli :: Char -> Polynomial Float Char Int -> Polynomial Float Char Int
-derivada_poli _ (Poli []) = (Poli [])
+derivada_poli _ (Poli []) = Poli [(0,"",[])] 
 derivada_poli a (Poli ((d,e,f):xs)) = if( find_elem a e) then (concat_poli (d*(fromIntegral expo),e,new_expo) (derivada_poli a (Poli xs))) else ( (derivada_poli a (Poli xs)))
    where index_exp = index e a
          expo = f !! index_exp  
@@ -243,7 +243,7 @@ parse l = addCoeficient (addMissingExponent l)
 -- menu
 menu :: IO()
 menu = do
-      putStrLn "1) Normalizar polinomio"
+      putStrLn "\n1) Normalizar polinomio"
       putStrLn "2) Adicionar polinomios"
       putStrLn "3) Multiplicar polinomios"
       putStrLn "4) Derivar polinomio"
@@ -256,7 +256,6 @@ menu = do
             expression <- getLine
             putStrLn ("Expressão: " ++  (filter (/=' ') expression))
             let polinomio =getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) )
-            putStrLn (show polinomio) 
             putStr ("Polinomio normalizado: ")
             normalizar_poli polinomio 
             menu
@@ -270,9 +269,7 @@ menu = do
             putStrLn ("Segundo polinomio: " ++  (filter (/=' ') expression2))
             let pol1 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression1))) )
             let pol2 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression2))) )
-            putStrLn (show pol1)
-            putStrLn (show pol2)
-            putStr ("Resultado:")
+            putStr ("\nResultado:")
             normalizar_poli (add_poly pol1 pol2)
             menu
       else if (opc == '3') then
@@ -285,7 +282,7 @@ menu = do
             putStrLn ("Segundo polinomio: " ++  (filter (/=' ') expression2))
             let pol1 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression1))) )
             let pol2 = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression2))) )
-            putStr ("Resultado:")
+            putStr ("\nResultado:")
             normalizar_poli (mult_poli pol1 pol2)
             menu
       else if (opc == '4') then
@@ -298,14 +295,16 @@ menu = do
             let polinomio = getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') expression))) )
             if (isNumber var) then
                do
-                  putStrLn ("Variavel invalida")
+                  putStrLn ("\nVariavel invalida")
                   menu
             else 
                do 
-                  putStr ("Polinomio derivado: ")
+                  putStr ("\nPolinomio derivado: ")
                   normalizar_poli (derivada_poli var polinomio) 
                   menu
       else if (opc == '0') then
-         exitSuccess
-      else menu
+         do
+            putStrLn "\nPrograma terminado!"
+      else menu 
+         
          
