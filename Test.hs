@@ -272,7 +272,7 @@ testDerivar13 =
     TestCase $ assertEqual "testDerivar13: Deve retornar o polinomios vazio (monomios podem ter três variaveis) " (Poli [(0,"",[])]) (derivada_poli 'a' (Poli [(1 ,"xy",[1,2]),(2,['y'],[3]),(1 ,"yzx",[3,2,4]),(2,['x'],[3])]))
 
 testes :: IO Counts
-testes = runTestTT $ TestList [ testNormalizar1,testNormalizar2,testNormalizar3,testNormalizar4,testNormalizar5,testNormalizar6,testNormalizar5,testNormalizar6,testNormalizar7,testNormalizar8,testNormalizar9,testNormalizar10,testNormalizar11,testNormalizar12,testNormalizar13,testNormalizar14,testNormalizar15,
+testes = runTestTT $ TestList [ testNormalizar1,testNormalizar2,testNormalizar3,testNormalizar4,testNormalizar5,testNormalizar6,testNormalizar5,testNormalizar6,testNormalizar7,testNormalizar8,testNormalizar9,testNormalizar10,testNormalizar11,testNormalizar12,testNormalizar13,testNormalizar14,testNormalizar15,testNormalizar16,testNormalizar17,
                                 testAdicionar1,testAdicionar2,testAdicionar3,testAdicionar4,testAdicionar5,testAdicionar6,testAdicionar7,testAdicionar8,testAdicionar9,testAdicionar10,testAdicionar11,testAdicionar12,testAdicionar13,testAdicionar14,testAdicionar15,testAdicionar16,
-                                testMultiplicar1,testMultiplicar2,testMultiplicar3,testMultiplicar4,testMultiplicar5,testMultiplicar6,testMultiplicar7,
+                                testMultiplicar1,testMultiplicar2,testMultiplicar3,testMultiplicar4,testMultiplicar5,testMultiplicar6,testMultiplicar7,testMultiplicar8, testMultiplicar9, testMultiplicar10,
                                 testDerivar1,testDerivar2,testDerivar3,testDerivar4,testDerivar5,testDerivar6,testDerivar7,testDerivar8,testDerivar9,testDerivar10,testDerivar11,testDerivar12,testDerivar13 ]

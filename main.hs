@@ -1,10 +1,16 @@
 -- MENU --
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use camelCase" #-}
 module Polinomio where
 
 import System.Exit
 import Data.List
 import Data.List.Split
 import Data.Char
+
+import PFL2022TP1Tests
+import Data.String (IsString)
+
 data Polynomial a b c= Poli [(a,[b],[c])] deriving (Eq,Show)
 -- (a,[b],[c]) -> Representa um Monomio
 -- a = Coeficientes
@@ -307,4 +313,16 @@ menu = do
             putStrLn "\nPrograma terminado!"
       else menu 
          
-         
+output :: String -> String -> IO ()
+output str1 str2 = normalizar_poli ( add_poly (getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') str1))))) (getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') str2))))))
+
+output2 :: Char -> String -> IO ()
+output2 c str = normalizar_poli(derivada_poli c (getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') str))))))
+
+output_mult :: String -> String -> IO ()
+output_mult str1 str2 = normalizar_poli ( mult_poli (getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') str1))))) (getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') str2))))))
+
+
+output_mult1 :: String -> String -> String
+output_mult1 str1 str2 = show ( mult_poli (getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') str1))))) (getTuplo (map parse (splitOn [' '] (separateMonom(filter (/=' ') str2))))))
+
